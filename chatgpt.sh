@@ -1,3 +1,7 @@
 #!/bin/bash
 
-echo "Building something cool"
+while true; do
+    read -e -p "> " input
+
+    echo $input
+done
