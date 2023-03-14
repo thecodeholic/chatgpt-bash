@@ -50,6 +50,9 @@ read_api_key
 
 echo "Hello! I am ChatGPT in your linux terminal. Ask me anything..."
 
+# Define the behavior of chat
+messages='{"role": "system", "content": "You are a helpful assistant."}'
+
 while true; do
     # Read the user input, also enable arrow navigation
     read -e -p "> " input
@@ -60,7 +63,7 @@ while true; do
     fi
 
     # Prepare message(s)
-    messages="{\"role\": \"user\", \"content\": \"$input\"}"
+    messages="$messages,{\"role\": \"user\", \"content\": \"$input\"}"
 
     # Prepare request payload data
     data="{\"model\": \"gpt-3.5-turbo\",\"messages\": [$messages]}"
@@ -79,5 +82,11 @@ while true; do
     # Get Response, extract content and print
     answer=$(echo "$response" | jq -r '.choices[0].message.content')
     echo -e "$answer"
+
+    # Prepare new message
+    new_message="{\"role\": \"assistant\", \"content\": \"$answer\"}"
+
+    # Append new message into all messages
+    messages="$messages,$new_message"
 
 done
