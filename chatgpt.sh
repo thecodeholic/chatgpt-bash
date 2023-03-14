@@ -44,6 +44,26 @@ read_api_key() {
 
 }
 
+
+show_loader() {
+  # Start the loader animation
+  spinner="/-\|"
+  while :
+  do
+    for i in $(seq 0 3); do
+      # Print character on the same line
+      echo -ne "\r${spinner:$i:1}  "
+      sleep 0.1
+    done
+  done &
+}
+
+stop_loader() {
+  # Stop the loader animation
+  kill $! &> /dev/null
+}
+
+
 install_jq
 
 read_api_key
@@ -68,8 +88,15 @@ while true; do
     # Prepare request payload data
     data="{\"model\": \"gpt-3.5-turbo\",\"messages\": [$messages]}"
 
+    show_loader
+
     # Make request to OpenAI API
     response=$(curl $url -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer $apikey" -d "$data" -s )
+
+    stop_loader
+    
+    # Move cursor on the same line at the beginning
+    echo -ne "\r"
 
     error=$(echo "$response" | jq -r '.error.message')
     
