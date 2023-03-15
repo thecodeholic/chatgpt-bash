@@ -7,6 +7,9 @@ apikey=
 # Define red color code
 COLOR_RED='\033[0;31m'
 
+# Define orange color code
+ORANGE_COLOR='\033[38;5;214m'
+
 # Define reset color code
 COLOR_NC='\033[0m'
 
@@ -18,6 +21,15 @@ install_jq() {
         echo -e "${COLOR_RED}\"jq\" is required to run this script. Exiting...${COLOR_NC}"
         exit 1
     fi
+}
+
+check_if_glow_is_installed() {
+  # Check if jq command is available
+  if command -v glow > /dev/null; then
+    echo 1
+  else
+    echo 0
+  fi
 }
 
 read_api_key() {
@@ -44,7 +56,6 @@ read_api_key() {
 
 }
 
-
 show_loader() {
   # Start the loader animation
   spinner="/-\|"
@@ -68,6 +79,13 @@ install_jq
 
 read_api_key
 
+glow_installed=$(check_if_glow_is_installed)
+
+if [ "$glow_installed" == "0" ]; then
+  echo -e "${ORANGE_COLOR}\"glow\" is recommended to format ChatGPT answers nicely."
+  echo -e "Check the installation instructions here: https://github.com/charmbracelet/glow#installation ${COLOR_NC}"
+fi
+  
 echo "Hello! I am ChatGPT in your linux terminal. Ask me anything..."
 
 # Define the behavior of chat
@@ -94,7 +112,7 @@ while true; do
     response=$(curl $url -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer $apikey" -d "$data" -s )
 
     stop_loader
-    
+
     # Move cursor on the same line at the beginning
     echo -ne "\r"
 
@@ -108,10 +126,19 @@ while true; do
 
     # Get Response, extract content and print
     answer=$(echo "$response" | jq -r '.choices[0].message.content')
-    echo -e "$answer"
+
+    if  [ "$glow_installed" == "0" ]; then
+      echo -e "$answer"
+    else
+      # Treat the output as markdown and format is nicely with glow
+      echo -e "$answer" | glow -
+    fi
+    
+    # Convert $answer into JSON formatted string
+    answer=$(echo "$answer" | jq -sRr @json)
 
     # Prepare new message
-    new_message="{\"role\": \"assistant\", \"content\": \"$answer\"}"
+    new_message="{\"role\": \"assistant\", \"content\": $answer}"
 
     # Append new message into all messages
     messages="$messages,$new_message"
