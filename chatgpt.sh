@@ -100,6 +100,14 @@ while true; do
       continue
     fi
 
+    # If the input is empty continue
+    if [ "$input" == "new" ]; then
+      # Reset messages
+      messages='{"role": "system", "content": "You are a helpful assistant."}'
+      echo -e "Starting new conversation..."
+      continue
+    fi
+
     # Prepare message(s)
     messages="$messages,{\"role\": \"user\", \"content\": \"$input\"}"
 
