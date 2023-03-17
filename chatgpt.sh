@@ -1,6 +1,6 @@
 #!/bin/bash
 
-file_path=~/.openapi.json
+file_path=~/.openaiapi.json
 url="https://api.openai.com/v1/chat/completions"
 apikey=
 
@@ -42,7 +42,8 @@ read_api_key() {
             return 0
         else
             # If file does not exist we ask user to enter his api key
-            read -p "Please enter your OpenAI API Key > " apikey
+            echo -e "Please enter your OpenAI API Key. You can get your API key from here: https://platform.openai.com/account/api-keys"
+            read -p "> " apikey
 
             # If user entered non empty apikey we save that in $file_path location
             if [ -n "$apikey" ]; then
